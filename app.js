@@ -43,10 +43,10 @@ const getFollowingPeopleIdsOfUser = async (username) => {
 const authentication = (request, response, next) => {
   let jwtToken;
   const authHeader = request.headers["authorization"];
-  if (authHeader) {
+  if (authHeader !== undefined) {
     jwtToken = authHeader.split(" ")[1];
   }
-  if (jwtToken) {
+  if (jwtToken !== undefined) {
     jwt.verify(jwtToken, "MY_SECRET_TOKEN", async (error, payload) => {
       if (error) {
         response.status(401);
@@ -62,6 +62,8 @@ const authentication = (request, response, next) => {
     response.send("Invalid JWT Token");
   }
 };
+
+//tweet access verification
 
 const tweetAccessVerification = async (request, response, next) => {
   const { userId } = request;
@@ -119,7 +121,7 @@ app.post("/login/", async (request, response) => {
     );
 
     if (isPasswordCorrect) {
-      const payload = { username, userId: userDBDetails.user_Id };
+      const payload = { username, userId: userDBDetails.user_id };
       const jwtToken = jwt.sign(payload, "MY_SECRET_TOKEN");
       response.send({ jwtToken });
     } else {
@@ -175,20 +177,6 @@ app.get("/user/followers/", authentication, async (request, response) => {
   response.send(followers);
 });
 
-/*const follows = async (request, response, next) => {
-  const { tweetId } = request.params;
-  let isFollowing = await db.get(`
-    select * from follower where
-    follower_user_id=(select user_id from user where username='${request.username}')
-    and
-    follower_user_id=(select user.user_id from tweet natural join user where tweet_id=${tweetId});`);
-  if (isFollowing === undefined) {
-    response.status(401);
-    response.send("Invalid Request");
-  } else {
-    next();
-  }
-};*/
 
 //api6
 
